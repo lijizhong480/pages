@@ -1088,6 +1088,7 @@ func (a *App) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", a.home)
 	mux.HandleFunc("GET /app.js", asset("web/app.js", "application/javascript; charset=utf-8"))
+	mux.HandleFunc("GET /i18n.js", asset("web/i18n.js", "application/javascript; charset=utf-8"))
 	mux.HandleFunc("GET /style.css", asset("web/style.css", "text/css; charset=utf-8"))
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { jsonOut(w, 200, map[string]string{"status": "ok"}) })
 	mux.HandleFunc("GET /api/auth/setup-status", a.setupStatus)

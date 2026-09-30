@@ -8,6 +8,7 @@
 </p>
 
 <p align="center">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
   <img alt="Go 1.23" src="https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white" />
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" />
   <img alt="API first" src="https://img.shields.io/badge/API-first-67D3AA" />
@@ -274,3 +275,7 @@ Pages currently focuses on publishing self-contained HTML documents. Its release
 ## Project Philosophy
 
 AI makes producing interfaces dramatically faster. Publishing those interfaces still requires ownership, review, permissions, traceability, and a stable destination. Pages provides that missing operational layer without introducing a large infrastructure stack.
+
+## License
+
+Pages is open-source software available under the [MIT License](LICENSE). You may use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, subject to the license terms.
