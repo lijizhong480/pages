@@ -1,99 +1,158 @@
-# Pages
+<p align="center"><img src="pages-logo.png" alt="Pages logo" width="96" /></p>
 
-一个面向团队和 AI Agent 的轻量 HTML 发布平台。使用工作空间隔离权限，以项目组织页面，支持浏览器和 API 发布。
+<h1 align="center">Pages</h1>
 
-## 产品截图
+<p align="center">
+  <strong>A lightweight, AI-native publishing workspace for teams and agents.</strong><br />
+  Turn generated HTML into reviewable previews, controlled releases, and durable public pages.
+</p>
 
-### 登录页
+<p align="center">
+  <img alt="Go 1.23" src="https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white" />
+  <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" />
+  <img alt="API first" src="https://img.shields.io/badge/API-first-67D3AA" />
+  <img alt="Local first" src="https://img.shields.io/badge/storage-local--first-243B35" />
+</p>
 
-![Pages 登录页](docs/images/login.png)
+<p align="center">
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#features">Features</a> •
+  <a href="#api-quickstart">API</a> •
+  <a href="#docker-deployment">Docker</a> •
+  <a href="#security-model">Security</a>
+</p>
 
-### 工作空间
+Pages is a compact publishing service for teams that create web content with AI. It provides a browser workspace for people and a clean HTTP API for agents, while keeping every workspace, project, preview, release, and historical version under explicit control.
 
-![Pages 工作空间](docs/images/workspace.png)
+Instead of copying generated HTML directly to production, Pages introduces a simple release workflow:
 
-## 核心能力
-
-- 工作空间和项目管理
-- 用户登录、用户管理和平台角色管理
-- 工作空间成员授权，支持所有者、管理员、编辑者、查看者
-- 工作空间级 API Token，支持 `read`、`write`、`admin` 权限
-- HttpOnly 会话 Cookie、CSRF 防护和 PBKDF2 密码哈希
-- Token 明文仅创建时返回，服务端只保存 SHA-256 哈希
-- 支持 multipart、JSON 和原始 HTML 上传
-- 页面列表、覆盖更新和删除
-- 上传先生成独立预览版本，确认后再正式发布
-- 完整版本历史、任意版本预览和一键版本切换/回滚
-- 旧版数据自动迁移，旧 `/p/{slug}` 地址继续可用
-- 本地文件持久化和原子索引写入
-- 上传页面通过 CSP sandbox 与管理端隔离
-- 单文件最大 5MB，slug 严格校验
-
-## 启动
-
-```bash
-PAGE_TOKEN='换成一个长随机字符串' go run .
+```text
+Create a project → Upload HTML → Review an isolated preview → Publish → Roll back when needed
 ```
 
-打开 <http://localhost:8080>。首次访问会引导创建第一个平台管理员账号，原有工作空间会自动授权给该管理员。
+## Product Tour
 
-`PAGE_TOKEN` 继续作为自动化和紧急管理使用的平台级 API Token；浏览器管理端使用用户登录，不再保存管理 Token。
+### Secure workspace sign-in
 
-| 变量 | 默认值 | 说明 |
-|---|---|---|
-| `PAGE_TOKEN` | `dev-token` | 平台管理员密钥，生产环境必须设置 |
-| `PAGE_ADDR` | `:8080` | 监听地址 |
-| `PAGE_DATA` | `./data` | 元数据和页面存储目录 |
+![Pages sign-in screen](docs/images/login.png)
 
-## 数据结构
+### Workspace and project management
+
+![Pages workspace dashboard](docs/images/workspace.png)
+
+## Features
+
+- **Workspace isolation** — separate teams, projects, members, API credentials, and published content.
+- **Project-based organization** — group related pages under stable workspace and project identifiers.
+- **Human and agent access** — use the browser interface for editorial work or the HTTP API for automation.
+- **Preview-first publishing** — every upload creates an isolated preview without changing the live page.
+- **Controlled releases** — explicitly promote a selected version after review.
+- **Complete version history** — inspect prior versions and switch the published version to roll back.
+- **Role-based access control** — assign owner, administrator, editor, or viewer access per workspace.
+- **Scoped API tokens** — issue workspace credentials with `read`, `write`, and `admin` permissions.
+- **Secure browser sessions** — HttpOnly cookies, CSRF protection, and PBKDF2 password hashing.
+- **Protected credentials** — workspace token secrets are shown once; only SHA-256 hashes are stored.
+- **Flexible HTML ingestion** — upload with multipart forms, JSON payloads, or raw HTML requests.
+- **Safe content separation** — uploaded pages run under a restrictive CSP sandbox, isolated from the admin UI.
+- **Reliable local persistence** — page files and metadata use local storage with atomic index writes.
+- **Legacy compatibility** — existing pages are migrated automatically and old `/p/{slug}` links continue to work.
+- **Small operational footprint** — a single Go binary with no external database requirement.
+
+## How It Works
+
+Pages separates authoring from publishing. An upload is stored as a new immutable version and receives a preview URL. The public URL changes only after that version is explicitly published.
+
+```text
+AI agent or browser
+        │
+        ▼
+  Workspace API
+        │
+        ├── Project metadata
+        ├── Versioned HTML files
+        └── Preview URL
+                │
+                ▼
+        Review and approval
+                │
+                ▼
+         Stable public URL
+```
+
+The default storage layout is intentionally easy to inspect and back up:
 
 ```text
 data/
 ├── state.json
 └── workspaces/
-    └── {workspace}/projects/{project}/pages/{slug}.html
+    └── {workspace}/projects/{project}/pages/{slug}/versions/{version}.html
 ```
 
-首次启动新版服务时，原 `data/index.json` 和 `data/pages` 中的页面会复制到 `default/legacy`。旧文件不会被删除。
+## Quick Start
 
-## API 示例
+Requirements:
 
-### 创建工作空间和项目
+- Go 1.23 or later
+- A modern browser
+
+Start the service with an explicit platform token:
+
+```bash
+PAGE_TOKEN='replace-with-a-long-random-secret' go run .
+```
+
+Open [http://localhost:8080](http://localhost:8080). On first launch, Pages guides you through creating the initial platform administrator. Existing workspaces are automatically assigned to that administrator.
+
+> `PAGE_TOKEN=dev-token` is suitable only for local evaluation. Always set a strong, unique secret in production.
+
+### Configuration
+
+| Environment variable | Default | Description |
+|---|---:|---|
+| `PAGE_TOKEN` | `dev-token` | Platform-level token for automation and emergency administration |
+| `PAGE_ADDR` | `:8080` | HTTP listen address |
+| `PAGE_DATA` | `./data` | Metadata and page storage directory |
+
+## API Quickstart
+
+The examples below use the platform token. Workspace tokens should be preferred for day-to-day agent workflows because their access is isolated to one workspace.
+
+### Create a workspace and project
 
 ```bash
 curl -X POST http://localhost:8080/api/workspaces \
   -H "Authorization: Bearer $PAGE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"slug":"acme","name":"Acme 团队"}'
+  -d '{"slug":"acme","name":"Acme Team"}'
 
 curl -X POST http://localhost:8080/api/workspaces/acme/projects \
   -H "Authorization: Bearer $PAGE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"slug":"website","name":"品牌官网"}'
+  -d '{"slug":"website","name":"Brand Website"}'
 ```
 
-### 创建工作空间 Token
+### Create a workspace token
 
 ```bash
 curl -X POST http://localhost:8080/api/workspaces/acme/tokens \
   -H "Authorization: Bearer $PAGE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"AI 发布助手","scopes":["read","write"]}'
+  -d '{"name":"AI Publisher","scopes":["read","write"]}'
 ```
 
-响应中的 `secret` 只显示一次。之后可使用该 Token 管理 `acme` 工作空间，但无法访问其他空间。
+The response contains a `secret` value exactly once. Store it securely and use it as `WORKSPACE_TOKEN` for subsequent publishing requests.
 
-### 创建预览版本
+### Upload a preview
 
 ```bash
 curl -X POST http://localhost:8080/api/workspaces/acme/projects/website/pages \
   -H "Authorization: Bearer $WORKSPACE_TOKEN" \
   -F "slug=home" \
-  -F "title=首页" \
+  -F "title=Home" \
   -F "file=@./index.html"
 ```
 
-也支持 JSON：
+JSON uploads are also supported:
 
 ```bash
 curl -X POST http://localhost:8080/api/workspaces/acme/projects/website/pages \
@@ -102,7 +161,7 @@ curl -X POST http://localhost:8080/api/workspaces/acme/projects/website/pages \
   -d '{"slug":"hello","title":"Hello","html":"<!doctype html><h1>Hello</h1>"}'
 ```
 
-上传不会立即改变线上内容。响应包含 `latestVersion` 和 `latestPreviewUrl`，确认预览后发布：
+The upload response includes `latestVersion` and `latestPreviewUrl`. Review the preview, then publish that exact version:
 
 ```bash
 curl -X POST http://localhost:8080/api/workspaces/acme/projects/website/pages/home/publish \
@@ -111,63 +170,107 @@ curl -X POST http://localhost:8080/api/workspaces/acme/projects/website/pages/ho
   -d '{"version":"ver_xxx"}'
 ```
 
-查询历史版本：
+### Page URLs
 
 ```text
+# Stable published page
+GET /p/{workspace}/{project}/{slug}
+
+# Version history
 GET /api/workspaces/{workspace}/projects/{project}/pages/{slug}/versions
 ```
 
-正式展示地址保持不变：
+Uploading a new version never changes the stable public URL until the publish endpoint is called.
 
-```text
-GET /p/{workspace}/{project}/{slug}
+## Access Control
+
+### Platform roles
+
+| Role | Permissions |
+|---|---|
+| Platform administrator | Manage users, all workspaces, and platform configuration |
+| Member | Access only explicitly assigned workspaces |
+
+### Workspace roles
+
+| Role | Permissions |
+|---|---|
+| Owner | Manage members, projects, pages, and API tokens |
+| Administrator | Manage members, projects, pages, and API tokens |
+| Editor | View projects and upload, publish, replace, or delete pages |
+| Viewer | View projects and page listings |
+
+### API token scopes
+
+| Scope | Permissions |
+|---|---|
+| `read` | Read the assigned workspace, projects, pages, and versions |
+| `write` | Upload, replace, publish, and delete pages |
+| `admin` | Manage projects and workspace tokens; includes read and write access |
+
+Only the platform administrator token can create or delete workspaces.
+
+## Docker Deployment
+
+Create a `.env` file:
+
+```dotenv
+PAGE_TOKEN=replace-with-a-long-random-secret
 ```
 
-## 权限
-
-平台角色：
-
-| 角色 | 能力 |
-|---|---|
-| 平台管理员 | 管理用户、所有工作空间及平台配置 |
-| 普通成员 | 只能访问明确授权的工作空间 |
-
-工作空间角色：
-
-| 角色 | 能力 |
-|---|---|
-| 所有者 | 管理成员、项目、页面和 API Token |
-| 空间管理员 | 管理成员、项目、页面和 API Token |
-| 编辑者 | 查看项目并发布、覆盖、删除页面 |
-| 查看者 | 查看项目和页面列表 |
-
-API Token Scope：
-
-| Scope | 能力 |
-|---|---|
-| `read` | 查看所属工作空间、项目和页面 |
-| `write` | 上传、覆盖和删除页面 |
-| `admin` | 管理项目和工作空间 Token，并包含读写权限 |
-
-只有平台管理员 Token 可以创建或删除工作空间。
-
-## Docker
-
-在 `.env` 中设置 `PAGE_TOKEN` 后运行：
+Build and start the service:
 
 ```bash
 docker compose up -d --build
 ```
 
-`./data` 会挂载到容器的 `/app/data`。
+The Compose configuration mounts `./data` at `/app/data`, so metadata, previews, published pages, and version history survive container replacement.
 
-## 验证
+Check service health:
+
+```bash
+curl http://localhost:8080/healthz
+```
+
+## Security Model
+
+Pages treats uploaded HTML as untrusted content.
+
+- Uploaded pages are served separately from the management application.
+- A restrictive Content Security Policy sandbox limits page capabilities.
+- Browser authentication uses HttpOnly, SameSite session cookies.
+- State-changing browser requests require CSRF validation.
+- Passwords are derived with PBKDF2 and unique salts.
+- API token plaintext is never persisted.
+- Workspace tokens limit the blast radius of leaked automation credentials.
+- Slugs are strictly validated to prevent path traversal.
+- Each HTML upload is limited to 5 MB.
+
+For production use, place Pages behind a TLS-terminating reverse proxy, protect the data directory with regular backups, rotate credentials, and grant every agent only the minimum required scope.
+
+## Legacy Data Migration
+
+On the first launch of the workspace-aware version, content from `data/index.json` and `data/pages` is copied into `default/legacy`. Original files are retained and legacy `/p/{slug}` URLs remain available.
+
+## Development
+
+Run the test and static analysis suites:
 
 ```bash
 go test ./...
 go vet ./...
 ```
 
-## 当前边界
+Build a local binary:
 
-当前版本聚焦单 HTML 页面发布。面向 AI 的下一阶段是 Deployment/Preview/Release：先生成预览、通过校验或审批后再切换生产版本，并支持回滚和多文件站点。
+```bash
+go build -o page-service .
+```
+
+## Current Scope
+
+Pages currently focuses on publishing self-contained HTML documents. Its release model already supports preview, approval, publication, history, and rollback. Multi-file sites, richer deployment policies, automated validation, and approval workflows are natural future extensions.
+
+## Project Philosophy
+
+AI makes producing interfaces dramatically faster. Publishing those interfaces still requires ownership, review, permissions, traceability, and a stable destination. Pages provides that missing operational layer without introducing a large infrastructure stack.
