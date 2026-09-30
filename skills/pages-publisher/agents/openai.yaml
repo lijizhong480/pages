@@ -1,0 +1,5 @@
+interface:
+  display_name: "Pages Publisher"
+  short_description: "Publish and operate a self-hosted Pages service"
+  brand_color: "#67D3AA"
+  default_prompt: "Use $pages-publisher to create, preview, publish, or operate content in a self-hosted Pages workspace."

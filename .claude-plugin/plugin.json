@@ -1,0 +1,8 @@
+{
+  "name": "pages-publisher",
+  "description": "Publish and operate the self-hosted Pages workspace service.",
+  "version": "1.0.0",
+  "author": {
+    "name": "lijizhong480"
+  }
+}

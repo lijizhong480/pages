@@ -19,6 +19,7 @@
   <a href="#quick-start">Quick Start</a> •
   <a href="#features">Features</a> •
   <a href="#api-quickstart">API</a> •
+  <a href="#ai-agent-plugin">AI Plugin</a> •
   <a href="#docker-deployment">Docker</a> •
   <a href="#security-model">Security</a>
 </p>
@@ -80,6 +81,93 @@ Published documents remain independent, responsive HTML experiences. Teams and A
 - **Reliable local persistence** — page files and metadata use local storage with atomic index writes.
 - **Legacy compatibility** — existing pages are migrated automatically and old `/p/{slug}` links continue to work.
 - **Small operational footprint** — a single Go binary with no external database requirement.
+
+## AI Agent Plugin
+
+This repository is also a Claude Code and Codex plugin. Both hosts share the `pages-publisher` skill under [`skills/pages-publisher`](skills/pages-publisher), with native manifests in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) and [`.codex-plugin/plugin.json`](.codex-plugin/plugin.json).
+
+The skill helps agents create HTML previews, publish exact versions, inspect Pages resources, and deploy or diagnose the service. It deliberately separates preview creation from production publishing, and it protects tokens and persistent page data by default.
+
+### Install in Claude Code or Codex
+
+Clone the repository, then add its root directory through the plugin manager provided by Claude Code or Codex. For local Claude Code development, the repository can be loaded directly:
+
+```bash
+git clone https://github.com/lijizhong480/pages.git
+cd pages
+claude --plugin-dir .
+```
+
+Codex reads [`.codex-plugin/plugin.json`](.codex-plugin/plugin.json), while Claude Code reads [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json). Both discover the same `pages-publisher` skill, so prompts and operating rules remain consistent across hosts.
+
+### Configure the target service
+
+Create a workspace token with only the scopes the agent needs. For normal publishing, `read` and `write` are sufficient. Export the service origin and token in the agent's local environment:
+
+```bash
+export PAGES_BASE_URL="http://localhost:8080"
+export PAGES_TOKEN="<workspace-token>"
+```
+
+Do not commit the token to this repository or embed it in generated HTML. Use the platform `PAGE_TOKEN` only when workspace-level credentials cannot perform the requested administrative operation.
+
+### Invoke the skill
+
+Reference `$pages-publisher` explicitly when you want guaranteed activation. Example prompts:
+
+```text
+Use $pages-publisher to upload ./dist/index.html to workspace acme,
+project website, page slug home. Create a preview but do not publish it.
+```
+
+```text
+Use $pages-publisher to inspect the versions of acme/website/home,
+then publish version ver_xxx and report the stable public URL.
+```
+
+```text
+Use $pages-publisher to deploy this Pages service with Docker Compose,
+expose it on host port 8082, preserve existing data, and verify /healthz.
+```
+
+The expected publishing flow is:
+
+```text
+Resolve destination → Upload HTML → Review preview → Publish exact version → Report public URL
+```
+
+Uploading a file with an existing slug creates a new immutable version. It does not change the live page until that exact version is published.
+
+### Use the command-line helper
+
+Agents and CI jobs can call the bundled helper directly:
+
+```bash
+bash skills/pages-publisher/scripts/pages-client.sh --help
+```
+
+Common operations:
+
+```bash
+# Verify that the service is available
+bash skills/pages-publisher/scripts/pages-client.sh health
+
+# Inspect destinations and existing content
+bash skills/pages-publisher/scripts/pages-client.sh workspaces
+bash skills/pages-publisher/scripts/pages-client.sh projects acme
+bash skills/pages-publisher/scripts/pages-client.sh pages acme website
+
+# Upload an isolated preview
+bash skills/pages-publisher/scripts/pages-client.sh \
+  upload acme website home "Home" ./dist/index.html
+
+# Inspect versions, then publish the exact reviewed version
+bash skills/pages-publisher/scripts/pages-client.sh versions acme website home
+bash skills/pages-publisher/scripts/pages-client.sh \
+  publish acme website home ver_xxx
+```
+
+The helper prints the original JSON response so an agent or CI pipeline can capture `latestVersion`, `latestPreviewUrl`, and the final page metadata without scraping human-readable output.
 
 ## How It Works
 

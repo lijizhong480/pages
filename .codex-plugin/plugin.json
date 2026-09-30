@@ -1,0 +1,21 @@
+{
+  "name": "pages-publisher",
+  "version": "1.0.0",
+  "description": "Publish and operate the self-hosted Pages workspace service.",
+  "author": {
+    "name": "lijizhong480"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Pages Publisher",
+    "defaultPrompt": "Use the Pages Publisher skill to create, preview, publish, or operate content in a self-hosted Pages workspace.",
+    "shortDescription": "Publish and operate self-hosted Pages",
+    "longDescription": "Create HTML previews, publish exact versions, manage Pages workspaces, and deploy or troubleshoot the Pages service.",
+    "developerName": "lijizhong480",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ]
+  }
+}
