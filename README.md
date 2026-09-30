@@ -2,6 +2,16 @@
 
 一个面向团队和 AI Agent 的轻量 HTML 发布平台。使用工作空间隔离权限，以项目组织页面，支持浏览器和 API 发布。
 
+## 产品截图
+
+### 登录页
+
+![Pages 登录页](docs/images/login.png)
+
+### 工作空间
+
+![Pages 工作空间](docs/images/workspace.png)
+
 ## 核心能力
 
 - 工作空间和项目管理
