@@ -1,0 +1,22 @@
+services:
+  page-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: local/page-service:latest
+    container_name: page-service
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PAGE_TOKEN: ${PAGE_TOKEN:?请在 .env 中设置 PAGE_TOKEN}
+      PAGE_ADDR: ":8080"
+      PAGE_DATA: "/app/data"
+    volumes:
+      - ./data:/app/data
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
