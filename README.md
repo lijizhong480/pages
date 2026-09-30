@@ -33,13 +33,35 @@ Create a project → Upload HTML → Review an isolated preview → Publish → 
 
 ## Product Tour
 
-### Secure workspace sign-in
+### Bilingual, secure workspace sign-in
 
-![Pages sign-in screen](docs/images/login.png)
+Switch between Chinese and English directly from the sign-in screen. Pages keeps authentication, workspace isolation, and theme preferences in one focused entry point.
 
-### Workspace and project management
+![Pages English sign-in screen](docs/images/login-en.png)
 
-![Pages workspace dashboard](docs/images/workspace.png)
+### Workspace overview
+
+Navigate all accessible workspaces and projects from a single sidebar. The workspace home explains the publishing workflow, exposes the agent API endpoint, and keeps recent projects close at hand.
+
+![Pages workspace overview](docs/images/workspace-en.png)
+
+### Preview-first project publishing
+
+Each project provides a dedicated publishing surface with page metrics, environment status, drag-and-drop HTML upload, and an explicit preview step before release.
+
+![Pages project publishing screen](docs/images/project-en.png)
+
+### Published pages and version controls
+
+Review every page in a project, open the latest preview or production version, inspect version history, and remove content from the same management view.
+
+![Pages published page management](docs/images/pages-en.png)
+
+### Rich, standalone page output
+
+Published documents remain independent, responsive HTML experiences. Teams and AI agents can produce editorial reports, product pages, dashboards, research briefs, and other web-native deliverables.
+
+![Example AI research brief published with Pages](docs/images/published-page.png)
 
 ## Features
 
